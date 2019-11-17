@@ -7,8 +7,6 @@
 
 libusb_device_handle * deviceHandle;
 
-
-
 void exam(libusb_context* context){ //4.1.Enumeration des peripheriques
     libusb_device **list;
     ssize_t count=libusb_get_device_list(context,&list);
@@ -35,14 +33,14 @@ void exam(libusb_context* context){ //4.1.Enumeration des peripheriques
 
 
 //4.2.configuration du périphérique USB
-uint8_t * config(){ 
+uint8_t * config(){
     //Obtenir la configuration de la poignée
     struct libusb_config_descriptor * config;
     if(!libusb_get_config_descriptor(libusb_get_device(deviceHandle),0,&config)){
         //printf("config ok\n");
     }
     printf("valeur config = %d\n",config->bConfigurationValue);
-    
+
     //car le noyau linux est mechant! a enlever qd config ATMega16u2 ok
     for(int i=0;i<config->bNumInterfaces;i++){
         int iface=config->interface->altsetting[i].bInterfaceNumber;
@@ -51,19 +49,19 @@ uint8_t * config(){
             if(status!=0){ perror("libusb_detach_kernel_driver"); exit(-1);}
         }
     }
-  
+
     //Installer la configuration
     int status = libusb_set_configuration(deviceHandle,config->bConfigurationValue);
     if(status!=0){ perror("libusb_set_configuration"); exit(-1); }
-    
+
     //appropriation des interfaces
     uint8_t endPoint[config->bNumInterfaces][2]; //tableau de 2 endPoints pour chaque interface
-    
+
     for(int i=0;i<config->bNumInterfaces;i++){
         int iface=config->interface->altsetting[i].bInterfaceNumber;
         int status=libusb_claim_interface(deviceHandle,iface);
         if(status!=0){ perror("libusb_claim_interface"); exit(-1); }
-        
+
         //recupere les endpoints en mode interruption
         int k=0;
         for(int j=0;j<config->interface->altsetting[i].bNumEndpoints;j++){
@@ -87,8 +85,8 @@ int main(){
 
 	exam(context);
     config();
-    
-    
+
+
     libusb_close(deviceHandle);
 	libusb_exit(context);
 	return 0;
