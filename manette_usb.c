@@ -5,43 +5,45 @@
 #define vendorID 0x2341
 #define productID 0x0001
 
+#define nb_endpoint_max 10
+
 libusb_device_handle * deviceHandle;
 
 void exam(libusb_context* context){ //4.1.Enumeration des peripheriques
-    libusb_device **list;
-    ssize_t count=libusb_get_device_list(context,&list);
+    libusb_device **list; //liste des devices connectes
+    ssize_t count=libusb_get_device_list(context,&list); //recuperation de la liste
     if(count<0) {perror("libusb_get_device_list"); exit(-1);}
     ssize_t i=0;
+    int found=0;
     for(i=0;i<count;i++){
         libusb_device *device=list[i];
         struct libusb_device_descriptor desc;
         int status=libusb_get_device_descriptor(device,&desc);
         if(status!=0) continue;
-        //uint8_t bus=libusb_get_bus_number(device);
-        //uint8_t address=libusb_get_device_address(device);
-        //printf("Device Found @ (Bus:Address) %d:%d\n",bus,address);
-        //printf("Vendor ID 0x0%x\n",desc.idVendor);
-        //printf("Product ID 0x0%x\n",desc.idProduct);
-
-        if(desc.idVendor==vendorID && desc.idProduct==productID){
-            libusb_open(list[i], &deviceHandle);
-            //printf("ok\n");
+        if(desc.idVendor==vendorID && desc.idProduct==productID){ //test si le device corrrespond a celui cherche
+            libusb_open(list[i], &deviceHandle); //sauvegarde la poignee
+            found=1;
+            printf("device found\n");
+            break;
         }
     }
+    if (!found) {perror("Device Not Found"); exit(-1);}
     libusb_free_device_list(list,1);
 }
 
 
 //4.2.configuration du périphérique USB
-uint8_t * config(){
-    //Obtenir la configuration de la poignée
+void config(uint8_t endpoints[nb_endpoint_max]){
+    //Recuperer la configuration du device
     struct libusb_config_descriptor * config;
-    if(!libusb_get_config_descriptor(libusb_get_device(deviceHandle),0,&config)){
-        //printf("config ok\n");
+    if(libusb_get_config_descriptor(libusb_get_device(deviceHandle),0,&config)){
+        perror("Device descriptor NOK");
+        exit(-1);
     }
-    printf("valeur config = %d\n",config->bConfigurationValue);
+    printf("config value = %d\n",config->bConfigurationValue);
 
-    //car le noyau linux est mechant! a enlever qd config ATMega16u2 ok
+    //On reprend la main sur le peripherique car le noyau linux est mechant!
+    //a enlever qd config ATMega16u2 ok
     for(int i=0;i<config->bNumInterfaces;i++){
         int iface=config->interface->altsetting[i].bInterfaceNumber;
         if(libusb_kernel_driver_active(deviceHandle,iface)){
@@ -50,44 +52,48 @@ uint8_t * config(){
         }
     }
 
-    //Installer la configuration
+
+    //Installation de la configuration sur le peripherique
     int status = libusb_set_configuration(deviceHandle,config->bConfigurationValue);
-    if(status!=0){ perror("libusb_set_configuration"); exit(-1); }
+    if(status!=0){perror("libusb_set_configuration"); exit(-1);}
+    printf("set config OK\n");
 
     //appropriation des interfaces
-    uint8_t endPoint[config->bNumInterfaces][2]; //tableau de 2 endPoints pour chaque interface
-
-    for(int i=0;i<config->bNumInterfaces;i++){
-        int iface=config->interface->altsetting[i].bInterfaceNumber;
+    int cpt=0;
+    int pt_acces;
+    int address_pt_acces;
+    for(int i=0;i<config->bNumInterfaces;i++){ //parcour toutes les interfaces
+        int iface=config->interface->altsetting[i].bInterfaceNumber; //recupere le numero de l'interface
         int status=libusb_claim_interface(deviceHandle,iface);
-        if(status!=0){ perror("libusb_claim_interface"); exit(-1); }
+        if(status!=0){ perror("libusb_claim_interface error"); exit(-1); }
 
         //recupere les endpoints en mode interruption
-        int k=0;
-        for(int j=0;j<config->interface->altsetting[i].bNumEndpoints;j++){
-            if((config->interface->altsetting[i].endpoint->bmAttributes & 0x03) == LIBUSB_TRANSFER_TYPE_INTERRUPT){
-                endPoint[i][k]=config->interface->altsetting[i].endpoint->bEndpointAddress;
-                k++;
-            }
-            if(k>=2) break;
-        }
+        for(int j=0;j<config->interface[i].altsetting[0].bNumEndpoints;j++){ //parcour tout les endpoints
+          pt_acces = config->interface[i].altsetting[0].endpoint[j].bmAttributes;
+          address_pt_acces = config->interface[i].altsetting[0].endpoint[j].bEndpointAddress;
+          printf("Endpoint found : %d \n",address_pt_acces);
+          if((pt_acces & 0b00000011) == LIBUSB_TRANSFER_TYPE_INTERRUPT){ //On prend le premier point d'acces en mode interruption
+            endpoints[cpt]=address_pt_acces; //sauvegarde du endpoint
+    				cpt++;
+            printf("Endpoint %d saved\n",address_pt_acces);
+    			}
+    		}
     }
-    return endPoint;
 }
 
 
 
 int main(){
 	//initialisation de la librairie
-    libusb_context *context;
-    int status=libusb_init(&context);
-    if(status!=0) {perror("libusb_init"); exit(-1);}
+  libusb_context *context;
+  if(libusb_init(&context)){perror("libusb_init error"); exit(-1);}
 
 	exam(context);
-    config();
 
+  uint8_t endpoints[nb_endpoint_max];
+  config(endpoints);
 
-    libusb_close(deviceHandle);
+  libusb_close(deviceHandle);
 	libusb_exit(context);
 	return 0;
 }
