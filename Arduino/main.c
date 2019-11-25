@@ -9,13 +9,10 @@ void init_serial(int speed)
 {
     /* Set baud rate */
     UBRR0 = CPU_FREQ/(((unsigned long int)speed)<<4)-1;
-
     /* Enable transmitter & receiver */
     UCSR0B = (1<<TXEN0 | 1<<RXEN0);
-
     /* Set 8 bits character and 1 stop bit */
     UCSR0C = (1<<UCSZ01 | 1<<UCSZ00);
-
     /* Set off UART baud doubler */
     UCSR0A &= ~(1 << U2X0);
 }
@@ -33,7 +30,6 @@ unsigned char get_serial(void)
 }
 
 // For the AD converter
-
 void ad_init(unsigned char channel)
 {
     ADCSRA|=(1<<ADPS2)|(1<<ADPS1)|(1<<ADPS0);
@@ -49,13 +45,13 @@ unsigned int ad_sample(void){
 }
 
 // For the I/O
-
 void output_init(void){
     DDRB |= 0b00111111; // PIN 8,9,10,11,12,13 as output
 }
 
 void output_set(unsigned char value){
-    if(value==0) PORTB &= 0xfe; else PORTB |= 0x01;
+    //if(value==0) PORTB &= 0xfe; else PORTB |= 0x01;
+    PORTB ^= value;
 }
 
 void input_init(void){
@@ -74,8 +70,10 @@ int main(void){
     init_serial(9600);
     output_init();
     input_init();
+    output_set(0xFF);
 
     unsigned int joystick[2]= {0,0};
+    unsigned char message = 0x00;
 
     while(1){
         //joystick
@@ -89,17 +87,21 @@ int main(void){
                 send_serial(joystick[k] | 0b00100000); //on envoie la nouvelle valeure sur la liaison serie apres avoir ajoute 001 en debut de message
             }
         }
+
         //boutons
         if ((PIND&0b01111100)!=0b01111100) //on envoie la valeur des bouttons que si changement d'etat detecte
         {
             unsigned char message_out = input_get(); //recupere la valeur des boutons
             send_serial(message_out>>2 | 0b00100000);//on envoie les nouvelles valeure sur la liaison serie apres avoir ajoute 001 en debut de message
         }
-        _delay_ms(20);
 
-        //unsigned char message_in = get_serial();
-        //output_set(message_in);
-
+        //Leds
+        //if (Serial.available()){
+          message = get_serial();
+          if(message & 0x40 == 0x40) output_set(!message);
+          else if(message & 0x40 == 0x00) output_set(message);
+       	//}
+        _delay_ms(200);
     }
 
     return 0;

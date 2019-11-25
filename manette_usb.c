@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <libusb-1.0/libusb.h>
 
-#define vendorID 0x2341
-#define productID 0x0001
+#define vendorID 0x2a03
+#define productID 0x0043
 
 #define nb_endpoint_max 10
 
@@ -37,7 +37,9 @@ void config(uint8_t endpoints[nb_endpoint_max]){
     //Recuperer la configuration du device
     struct libusb_config_descriptor * config;
     if(libusb_get_config_descriptor(libusb_get_device(deviceHandle),0,&config)){
+        printf("nok3\n");
         perror("Device descriptor NOK");
+        printf("nok2\n");
         exit(-1);
     }
     printf("config value = %d\n",config->bConfigurationValue);
@@ -51,7 +53,6 @@ void config(uint8_t endpoints[nb_endpoint_max]){
             if(status!=0){ perror("libusb_detach_kernel_driver"); exit(-1);}
         }
     }
-
 
     //Installation de la configuration sur le peripherique
     int status = libusb_set_configuration(deviceHandle,config->bConfigurationValue);
