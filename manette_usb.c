@@ -64,7 +64,8 @@ void config(uint8_t endpoints[nb_endpoint_max]){
     int pt_acces;
     int address_pt_acces;
     for(int i=0;i<config->bNumInterfaces;i++){ //parcour toutes les interfaces
-        int iface=config->interface->altsetting[i].bInterfaceNumber; //recupere le numero de l'interface
+        int iface=config->interface[i].altsetting[0].bInterfaceNumber; //recupere le numero de l'interface
+        printf("indice = %d, interface = %d\n",i,iface);
         int status=libusb_claim_interface(deviceHandle,iface);
         if(status!=0){ perror("libusb_claim_interface error"); exit(-1); }
 
@@ -82,7 +83,21 @@ void config(uint8_t endpoints[nb_endpoint_max]){
     }
 }
 
+void free_interfaces(){
+    struct libusb_config_descriptor *config;
+    libusb_device *device = libusb_get_device(deviceHandle);
 
+    // récupération de la config active
+    int status = libusb_get_active_config_descriptor(device, &config);
+    if(status!=0){ perror("libusb_get_config_descriptor"); exit(-1);}
+
+    // relache des interfaces
+    for(int i = 0; i<config->bNumInterfaces; i++){
+        status=libusb_release_interface(deviceHandle,config->interface[i].altsetting[0].bInterfaceNumber);
+        if(status!=0){ perror("libusb_release_interface"); exit(-1);}
+    }
+    libusb_close(deviceHandle);
+}
 
 int main(){
 	//initialisation de la librairie
@@ -94,7 +109,8 @@ int main(){
   uint8_t endpoints[nb_endpoint_max];
   config(endpoints);
 
-  libusb_close(deviceHandle);
+  free_interfaces();
+
 	libusb_exit(context);
 	return 0;
 }
