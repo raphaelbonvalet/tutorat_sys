@@ -49,9 +49,8 @@ void output_init(void){
     DDRB |= 0b00111111; // PIN 8,9,10,11,12,13 as output
 }
 
-void output_set(unsigned char value){
-    //if(value==0) PORTB &= 0xfe; else PORTB |= 0x01;
-    PORTB ^= value;
+void output_set(unsigned char value, uint8_t pin){
+    if(value==0) PORTB &= (0xff^(pin)); else PORTB |= pin;
 }
 
 void input_init(void){
@@ -64,16 +63,34 @@ unsigned char input_get(void){
     return PIND ^ 0xFF;
 }
 
+void LED(unsigned char m){
+    unsigned char value;
+    uint8_t tab[6]= {1,2,4,8,16,32};
+    if (m<= 70 && m>= 65)
+    {
+        m -= 65;
+        value = 1;
+        output_set(value, tab[m]);
+    }
+    else if (m<= 102 && m>= 97)
+    {
+        m -= 97;
+        value = 0;
+        output_set(value, tab[m]);
+    }
+}
+
+uint8_t serial_available(void){
+    return (UCSR0A & (1<<RXC0)) !=0?1:0;
+}
 
 
 int main(void){
     init_serial(9600);
     output_init();
     input_init();
-    output_set(0xFF);
 
     unsigned int joystick[2]= {0,0};
-    unsigned char message = 0x00;
 
     while(1){
         //joystick
@@ -94,14 +111,10 @@ int main(void){
             unsigned char message_out = input_get(); //recupere la valeur des boutons
             send_serial(message_out>>2 | 0b00100000);//on envoie les nouvelles valeure sur la liaison serie apres avoir ajoute 001 en debut de message
         }
-
-        //Leds
-        //if (Serial.available()){
-          message = get_serial();
-          if(message & 0x40 == 0x40) output_set(!message);
-          else if(message & 0x40 == 0x00) output_set(message);
-       	//}
-        _delay_ms(200);
+        
+        //LEDs
+        if (serial_available()) LED(get_serial());
+        _delay_ms(20);
     }
 
     return 0;
