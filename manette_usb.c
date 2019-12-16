@@ -37,9 +37,7 @@ void config(uint8_t endpoints[nb_endpoint_max]){
     //Recuperer la configuration du device
     struct libusb_config_descriptor * config;
     if(libusb_get_config_descriptor(libusb_get_device(deviceHandle),0,&config)){
-        printf("nok3\n");
         perror("Device descriptor NOK");
-        printf("nok2\n");
         exit(-1);
     }
     printf("config value = %d\n",config->bConfigurationValue);
