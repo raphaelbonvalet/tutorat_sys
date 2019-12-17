@@ -29,7 +29,6 @@ On utilise le fichier c fournis qui contient deja les fonctions permettant notam
 
 
 ## Programmation ATMega16u2
-Vous pouvez ensuite modifier le projet pour obtenir un périphérique USB avec deux interfaces et jusqu’à deux points d’accès de type interruption par interface. Un point d’accès dans le sens hôte vers périphérique et deux autres en sens inverse. Vous pouvez vous aider de la démonstration Keyboard dans le répertoire Device/LowLevel. La déclaration des interfaces et des point d’accès est clairement montrée dans les fichiers Descriptors.c et Descriptors.h de cette démonstration. La gestion de points d’interruption est montrée dans l’autre source C de la démonstration, cherchez les fonctions Endpoint_ConfigureEndpoint, Endpoint_SelectEndpoint, etc. N’hésitez pas à consulter la documentation de la bibliothèque sur Internet.
 
 ### Descripteur.h
 * On a cree deux interfaces avec **USB_Descriptor_Interface_t**: une pour l'entree avec 2 endpoint (joystick et boutons) et une autre pour la sortie avec 1 seul endpoint.
@@ -41,5 +40,5 @@ Vous pouvez ensuite modifier le projet pour obtenir un périphérique USB avec d
 * On parametre les interfaces et les endpoints declarés dans le fichier **Descripteur.h**: identifiants, nombre de point d'acces par interface, adresse des points d'acces, etc...
 
 ### PAD.c
-*(ligne 91) initialise les endpoints
+* Initialise les endpoints (ligne 91)
 * Fonction Main pour envoyer recevoir.
