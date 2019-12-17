@@ -58,7 +58,7 @@ int main(void)
         if (Endpoint_IsReadWriteAllowed() && Endpoint_IsINReady())
         {
             /* Save the current report data for later comparison to check for changes */
-            PrevKeyboardReportData = KeyboardReportData;
+            //PrevKeyboardReportData = KeyboardReportData;
 
             /* Write Keyboard Report Data */
             Endpoint_Write_8(0xAA);
@@ -90,7 +90,7 @@ void SetupHardware(void)
  */
 void EVENT_USB_Device_ConfigurationChanged(void)
 {
-	/* Setup HID Report Endpoints */
+	/* Setup PAD Report Endpoints */
 	Endpoint_ConfigureEndpoint(PAD_IN_EPADDR_JOYSTICK, EP_TYPE_INTERRUPT, PAD_EPSIZE, 1);
     Endpoint_ConfigureEndpoint(PAD_IN_EPADDR_BUTTON, EP_TYPE_INTERRUPT, PAD_EPSIZE, 1);
 	Endpoint_ConfigureEndpoint(PAD_OUT_EPADDR, EP_TYPE_INTERRUPT, PAD_EPSIZE, 1);

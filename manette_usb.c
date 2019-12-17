@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <libusb-1.0/libusb.h>
 
-#define vendorID 0x2a03
-#define productID 0x0043
+#define vendorID 0x1234
+#define productID 0x4321
 
 #define nb_endpoint_max 10
 
@@ -97,17 +97,59 @@ void free_interfaces(){
     libusb_close(deviceHandle);
 }
 
+void Send(char c, int endpoint_out)
+{
+    unsigned char data[8]={c};            /* data to send or to receive */
+    int size=sizeof(data);           /* size to send or maximum size to receive */
+    int timeout=0;        /* timeout in ms */
+        
+    /* OUT interrupt, from host to device */
+    int bytes_out;
+    int status=libusb_interrupt_transfer(deviceHandle,endpoint_out,data,size,&bytes_out,timeout);
+    if(status!=0){ perror("libusb_interrupt_transfer_S"); exit(-1); }
+}
+
+void Recieve(int endpoint_in)
+{
+    unsigned char data[8];           /* data to send or to receive */
+    int size=sizeof(data);;           /* size to send or maximum size to receive */
+    int timeout=500;        /* timeout in ms */
+
+    /* IN interrupt, host polling device */
+    int bytes_in;
+    int status=libusb_interrupt_transfer(deviceHandle,endpoint_in,data,size,&bytes_in,timeout);
+    if(status!=0){ perror("libusb_interrupt_transfer_R"); exit(-1); }
+    
+    printf("%c\n",data[0]);
+    
+    //return data[0];
+}
+
+
 int main(){
+    //init variables
+    unsigned char joystick;
+    unsigned char buttons;
+    char carac;
+    
 	//initialisation de la librairie
-  libusb_context *context;
-  if(libusb_init(&context)){perror("libusb_init error"); exit(-1);}
+    libusb_context *context;
+    if(libusb_init(&context)){perror("libusb_init error"); exit(-1);}
 
 	exam(context);
 
-  uint8_t endpoints[nb_endpoint_max];
-  config(endpoints);
+    uint8_t endpoints[nb_endpoint_max];
+    config(endpoints);
+  
+    while (carac != 'x')
+    {
+        carac = getchar();
+        Recieve(endpoints[0]);
+        Recieve(endpoints[1]);
+        //Send(carac, endpoints[2]);
+    }
 
-  free_interfaces();
+    free_interfaces();
 
 	libusb_exit(context);
 	return 0;
