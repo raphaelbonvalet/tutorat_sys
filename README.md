@@ -22,7 +22,11 @@ On recpere la configuration active puis on parcour la liste de ses interfaces po
 
 
 ## Programmation ATMega328p
-
+On utilise le fichier c fournis qui contient deja les fonctions permettant notamment de gerer la liaison série avec le 328p. Dans la fonction main():
+* On initialise la liaison série (à 9600 bauds) ainsi que les ports d'entrée (ADC sur PORTD) et de sortie (PORTB) avant de rentrer dans une boucle infinie.
+* Pour lire les valeurs des deux axes du joystick on initialise alternativement l'**ADC0** et l'**ADC1** puis on stock la valeur lue dans la variable **newjoystick**. Si cette valeur est différente de l'ancienne valeur (stockée dans le tableau **joystick**) alors on l'envoie sur la liaison série. On a pris soin de ne garder que les 6 premiers bits de la valeur lue sur le joytick pour eviter que de saturer la liaison série au moindre petit mouvement du joystick.
+* On lit aussi la valeur des boutons et de la meme maniere on ne l'envoie que si cette derniere à changé depuis le dernier relevé.
+* Concernant la reception de messages, on s'assure que a liaison série est disponible avec la fonction **serial_available()** avant de lire dans le registre **UDR0**. Cette fonction 
 
 ## Programmation ATMega16u2
 Sur le site http://www.fourwalledcubicle.com/LUFA.php téléchargez la dernière version de la bibliothèque USB LUFA. Créez un répertoire PolytechLille au même niveau que les répertoires Demos et Projects. Dans ce répertoire copiez le projet RelayBoard sous le nom, par exemple, PAD. Renommez les fichiers dans le répertoire et modifiez le makefile. Au niveau du makefile indiquez atmega16u2 comme micro-contrôleur, UNO comme platine et passez à 16Mhz. Dans le fichier de configuration du répertoire Config, commentez l’option CONTROL_ONLY_DEVICE.  
