@@ -13,11 +13,16 @@ De base, l'ATMega16u2 qui gere la communication USB de l'arduino est deja bien p
 
 Enfin, on recupere les points d'acces en mode interruption. Pour cela, on s'approprie toutes les interfaces de la configuration en les parcourants a l'aide d'une boucle (de 0 a **bNumInterfaces**). Il faut faire attention ici car l'indice de l'interface dans le tableau de toutes les interfaces ne correcpond pas au numero de l'interface **bInterfaceNumber**. Pour chacune des interfaces reclamees, on parcours la liste des points d'acces et on sauvegarde seulement ceux en mode interruption (**LIBUSB_TRANSFER_TYPE_INTERRUPT**) dans un tableau place en parametre de la fonction config()
 
+### Rececption d'un message (Recieve())
+
+### Envoie d'un message (Send())
+
 ### Fermeture du peripherique usb (free_interfaces())
 On recpere la configuration active puis on parcour la liste de ses interfaces pour les liberer avec **libusb_release_interface**. Enfin, on ferme la "poignée": **libusb_close(deviceHandle)**.
 
 
 ## Programmation ATMega328p
+
 
 ## Programmation ATMega16u2
 Sur le site http://www.fourwalledcubicle.com/LUFA.php téléchargez la dernière version de la bibliothèque USB LUFA. Créez un répertoire PolytechLille au même niveau que les répertoires Demos et Projects. Dans ce répertoire copiez le projet RelayBoard sous le nom, par exemple, PAD. Renommez les fichiers dans le répertoire et modifiez le makefile. Au niveau du makefile indiquez atmega16u2 comme micro-contrôleur, UNO comme platine et passez à 16Mhz. Dans le fichier de configuration du répertoire Config, commentez l’option CONTROL_ONLY_DEVICE.  
