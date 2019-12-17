@@ -24,7 +24,7 @@ Sur le site http://www.fourwalledcubicle.com/LUFA.php téléchargez la dernière
  
 Vous pouvez ensuite modifier le projet pour obtenir un périphérique USB avec deux interfaces et jusqu’à deux points d’accès de type interruption par interface. Un point d’accès dans le sens hôte vers périphérique et deux autres en sens inverse. Vous pouvez vous aider de la démonstration Keyboard dans le répertoire Device/LowLevel. La déclaration des interfaces et des point d’accès est clairement montrée dans les fichiers Descriptors.c et Descriptors.h de cette démonstration. La gestion de points d’interruption est montrée dans l’autre source C de la démonstration, cherchez les fonctions Endpoint_ConfigureEndpoint, Endpoint_SelectEndpoint, etc. N’hésitez pas à consulter la documentation de la bibliothèque sur Internet.
 
-###Descripteur.h
+### Descripteur.h
 *On a cree deux interfaces avec USB_Descriptor_interface_t
 une pour l'entree avec 2 endpoint
 une pour sortie avec 1 endpoint
@@ -32,16 +32,13 @@ une pour sortie avec 1 endpoint
 *Dans les macros on definie les addresses des endpoints et de taille 1 octet
 
 
-###Descripteur.c
+### Descripteur.c
 * On a definie un idVendor et idproduct.\
 * On parametre les interfaces et les endpoints declares dans le .h (identifiant, nb d'endpoint par interface, adresse des endpoints)
 
-###PAD.h
+### PAD.h
 * rien a part les prototypes des fonctions
 
-###PAD.c
+### PAD.c
 *(ligne 91) initialise les endpoints
 * Fonction Main pour envoyer recevoir.
-
-
-
