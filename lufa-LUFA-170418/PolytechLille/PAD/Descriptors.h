@@ -54,8 +54,8 @@
 			USB_Descriptor_Interface_t            PADInterfaceIN;
 			USB_Descriptor_Endpoint_t             PADReportINEndpointJoystick;
 			USB_Descriptor_Endpoint_t             PADReportINEndpointButton;
-            USB_Descriptor_Interface_t            PADInterfaceOUT;
-            USB_Descriptor_Endpoint_t             PADReportOUTEndpoint;
+      USB_Descriptor_Interface_t            PADInterfaceOUT;
+      USB_Descriptor_Endpoint_t             PADReportOUTEndpoint;
 		} USB_Descriptor_Configuration_t;
 
 		/** Enum for the device interface descriptor IDs within the device. Each interface descriptor
@@ -65,7 +65,7 @@
 		enum InterfaceDescriptors_t
 		{
 			INTERFACE_ID_PAD_IN = 0, /**< Relay board interface descriptor ID */
-            INTERFACE_ID_PAD_OUT = 1, /**< Relay board interface descriptor ID */
+      INTERFACE_ID_PAD_OUT = 1, /**< Relay board interface descriptor ID */
 		};
 
 		/** Enum for the device string descriptor IDs within the device. Each string descriptor should
@@ -79,14 +79,14 @@
 			STRING_ID_Product      = 2, /**< Product string ID */
 			STRING_ID_Serial       = 3, /**< Serial number string ID */
 		};
-        
+
     /* Macros: */
 		/** Endpoint address of the Keyboard PAD reporting IN endpoint. */
 		#define PAD_IN_EPADDR_JOYSTICK        (ENDPOINT_DIR_IN  | 1)
 
 		/** Endpoint address of the Keyboard PAD reporting IN endpoint. */
 		#define PAD_IN_EPADDR_BUTTON       (ENDPOINT_DIR_IN | 2)
-		
+
 		/** Endpoint address of the Keyboard PAD reporting OUT endpoint. */
 		#define PAD_OUT_EPADDR      (ENDPOINT_DIR_OUT | 3)
 
@@ -100,4 +100,3 @@
 		                                    const void** const DescriptorAddress)
 		                                    ATTR_WARN_UNUSED_RESULT ATTR_NON_NULL_PTR_ARG(3);
 #endif
-

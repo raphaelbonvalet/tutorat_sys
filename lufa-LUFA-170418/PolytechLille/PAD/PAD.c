@@ -50,7 +50,7 @@ int main(void)
 	for (;;)
     {
         USB_USBTask();
-        
+
         /* Select the Keyboard Report Endpoint */
         Endpoint_SelectEndpoint(PAD_IN_EPADDR_JOYSTICK);
 
@@ -92,7 +92,6 @@ void EVENT_USB_Device_ConfigurationChanged(void)
 {
 	/* Setup PAD Report Endpoints */
 	Endpoint_ConfigureEndpoint(PAD_IN_EPADDR_JOYSTICK, EP_TYPE_INTERRUPT, PAD_EPSIZE, 1);
-    Endpoint_ConfigureEndpoint(PAD_IN_EPADDR_BUTTON, EP_TYPE_INTERRUPT, PAD_EPSIZE, 1);
+  Endpoint_ConfigureEndpoint(PAD_IN_EPADDR_BUTTON, EP_TYPE_INTERRUPT, PAD_EPSIZE, 1);
 	Endpoint_ConfigureEndpoint(PAD_OUT_EPADDR, EP_TYPE_INTERRUPT, PAD_EPSIZE, 1);
 }
-

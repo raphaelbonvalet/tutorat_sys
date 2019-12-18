@@ -1,8 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <libusb-1.0/libusb.h>
-
-//#include <util/delay.h>
+#include <string.h>
 
 #define vendorID 0x1234
 #define productID 0x4321
@@ -104,7 +103,7 @@ void Send(char c, int endpoint_out)
     unsigned char data[8]={c}; /* data to send or to receive */
     int size=sizeof(data); /* size to send or maximum size to receive */
     int timeout=100; /* timeout in ms */
-        
+
     /* OUT interrupt, from host to device */
     int bytes_out;
     int status=libusb_interrupt_transfer(deviceHandle,endpoint_out,data,size,&bytes_out,timeout);
@@ -114,13 +113,14 @@ void Send(char c, int endpoint_out)
     }
 }
 
+
 char Recieve(int endpoint_in)
 {
-    unsigned char data[8]; /* data to send or to receive */
-    int size=sizeof(data); /* size to send or maximum size to receive */
-    int timeout=100; /* timeout in ms */
+    unsigned char data[8]; //data to send or to receive
+    int size=sizeof(data); //size to send or maximum size to receive
+    int timeout=100; // timeout in ms
 
-    /* IN interrupt, host polling device */
+    //IN interrupt, host polling device
     int bytes_in;
     int status=libusb_interrupt_transfer(deviceHandle,endpoint_in,data,size,&bytes_in,timeout);
     if(status!=0){
@@ -135,36 +135,70 @@ int main(){
     //init variables
     unsigned char joystick;
     unsigned char buttons;
-    char carac;
-    
+    char caract;
+
 	//initialisation de la librairie
     libusb_context *context;
     if(libusb_init(&context)){perror("libusb_init error"); exit(-1);}
 
-	exam(context);
+    exam(context);
 
     uint8_t endpoints[nb_endpoint_max];
     config(endpoints);
-  
+    /*
     while (carac != 'x')
     {
         scanf("%c",&carac);
         //carac = getchar();
         Send(carac, endpoints[2]);
-        
+
         char newjoystick = Recieve(endpoints[0]);
         if(newjoystick != joystick){
             joystick = newjoystick;
             printf("%c\n",joystick);
         }
-        
+
         char newbuttons = Recieve(endpoints[1]);
         if(newbuttons != buttons){
             buttons = newbuttons;
             printf("%c\n",buttons);
         }
-        
     }
+    */
+
+    while (1) {
+         int endPoint = endpoints[0];
+         unsigned char data[8]; //data to receive or send
+         int size=sizeof(data); //maximum size to receive
+         int timeout=1000; // timeout in ms
+         int bytes_in;
+         int bytes_out;
+
+         //reception joystick
+         int status=libusb_interrupt_transfer(deviceHandle, endPoint, data,size, &bytes_in, timeout);
+         if(status!=0){
+             perror("libusb_interrupt_transfer_R1");
+             exit(-1);
+         }
+         if (data!=joystick){
+           joystick=data
+           printf("joysticks value = %s\n",joystick);
+         }
+
+
+         endPoint = endpoints[2];
+         data[8]="a"; //data to send
+         size=sizeof(data); //size to send or maximum size to receive
+         timeout=1000; // timeout in ms
+         int bytes_out;
+         status=libusb_interrupt_transfer(deviceHandle, endPoint, data,size, &bytes_out, timeout);
+         if(status!=0){
+             perror("libusb_interrupt_transfer_S");
+             exit(-1);
+         }
+         printf("sent\n");
+    }
+
 
     free_interfaces();
 
