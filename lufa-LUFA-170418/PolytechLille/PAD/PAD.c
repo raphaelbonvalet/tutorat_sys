@@ -35,6 +35,7 @@
  *  the project and is responsible for the initial application hardware configuration.
  */
 
+#include "LUFA/Drivers/Peripheral/Serial.h"
 #include "PAD.h"
 
 
@@ -48,25 +49,39 @@ int main(void)
 	GlobalInterruptEnable();
 
 	for (;;)
-    {
-        USB_USBTask();
+  {
+		USB_USBTask();
 
-        /* Select the Keyboard Report Endpoint */
-        Endpoint_SelectEndpoint(PAD_IN_EPADDR_JOYSTICK);
+		Endpoint_SelectEndpoint(PAD_OUT_EPADDR); //selectionne le pont d'acces de sortie
 
-        /* Check if Keyboard Endpoint Ready for Read/Write and if we should send a new report */
-        if (Endpoint_IsReadWriteAllowed() && Endpoint_IsINReady())
-        {
-            /* Save the current report data for later comparison to check for changes */
-            //PrevKeyboardReportData = KeyboardReportData;
+		if (Endpoint_IsOUTReceived()){
+	    if (Endpoint_IsReadWriteAllowed()){
+			  /* Read in the LED report from the host */
+			  uint8_t LEDReport = Endpoint_Read_8();
+				Serial_SendByte(LEDReport);
+			}
+	    Endpoint_ClearOUT();
+	  }
 
-            /* Write Keyboard Report Data */
-            Endpoint_Write_8(0xAA);
 
-            /* Finalize the stream transfer to send the last packet */
-            Endpoint_ClearIN();
-        }
-    }
+		#if 0
+		/* Select the Keyboard Report Endpoint */
+		Endpoint_SelectEndpoint(PAD_IN_EPADDR_JOYSTICK);
+
+		/* Check if Keyboard Endpoint Ready for Read/Write and if we should send a new report */
+		if (Endpoint_IsReadWriteAllowed() && Endpoint_IsINReady())
+		{
+		    /* Save the current report data for later comparison to check for changes */
+		    //PrevKeyboardReportData = KeyboardReportData;
+
+		    /* Write Keyboard Report Data */
+		    Endpoint_Write_8(0xAA);
+
+		    /* Finalize the stream transfer to send the last packet */
+		    Endpoint_ClearIN();
+		}
+		#endif
+  }
 }
 
 /** Configures the board hardware and chip peripherals for the project's functionality. */
@@ -83,6 +98,7 @@ void SetupHardware(void)
 
 	/* Hardware Initialization */
 	USB_Init();
+	Serial_Init(9600,false);
 }
 
 /** Event handler for the USB_ConfigurationChanged event. This is fired when the host sets the current configuration
