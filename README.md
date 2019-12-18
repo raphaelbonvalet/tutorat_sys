@@ -41,4 +41,6 @@ On utilise le fichier c fournis qui contient deja les fonctions permettant notam
 
 ### PAD.c
 * Initialise les endpoints (ligne 91)
-* Fonction Main pour envoyer recevoir.
+* Fonction Main pour envoyer recevoir
+38
+87
