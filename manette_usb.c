@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <libusb-1.0/libusb.h>
 
+//#include <util/delay.h>
+
 #define vendorID 0x1234
 #define productID 0x4321
 
@@ -99,30 +101,33 @@ void free_interfaces(){
 
 void Send(char c, int endpoint_out)
 {
-    unsigned char data[8]={c};            /* data to send or to receive */
-    int size=sizeof(data);           /* size to send or maximum size to receive */
-    int timeout=0;        /* timeout in ms */
+    unsigned char data[8]={c}; /* data to send or to receive */
+    int size=sizeof(data); /* size to send or maximum size to receive */
+    int timeout=100; /* timeout in ms */
         
     /* OUT interrupt, from host to device */
     int bytes_out;
     int status=libusb_interrupt_transfer(deviceHandle,endpoint_out,data,size,&bytes_out,timeout);
-    if(status!=0){ perror("libusb_interrupt_transfer_S"); exit(-1); }
+    if(status!=0){
+        perror("libusb_interrupt_transfer_S");
+        exit(-1);
+    }
 }
 
-void Recieve(int endpoint_in)
+char Recieve(int endpoint_in)
 {
-    unsigned char data[8];           /* data to send or to receive */
-    int size=sizeof(data);;           /* size to send or maximum size to receive */
-    int timeout=500;        /* timeout in ms */
+    unsigned char data[8]; /* data to send or to receive */
+    int size=sizeof(data); /* size to send or maximum size to receive */
+    int timeout=100; /* timeout in ms */
 
     /* IN interrupt, host polling device */
     int bytes_in;
     int status=libusb_interrupt_transfer(deviceHandle,endpoint_in,data,size,&bytes_in,timeout);
-    if(status!=0){ perror("libusb_interrupt_transfer_R"); exit(-1); }
-    
-    printf("%c\n",data[0]);
-    
-    //return data[0];
+    if(status!=0){
+        perror("libusb_interrupt_transfer_R");
+        exit(-1);
+    }
+    return data[0];
 }
 
 
@@ -143,10 +148,22 @@ int main(){
   
     while (carac != 'x')
     {
-        carac = getchar();
-        Recieve(endpoints[0]);
-        Recieve(endpoints[1]);
-        //Send(carac, endpoints[2]);
+        scanf("%c",&carac);
+        //carac = getchar();
+        Send(carac, endpoints[2]);
+        
+        char newjoystick = Recieve(endpoints[0]);
+        if(newjoystick != joystick){
+            joystick = newjoystick;
+            printf("%c\n",joystick);
+        }
+        
+        char newbuttons = Recieve(endpoints[1]);
+        if(newbuttons != buttons){
+            buttons = newbuttons;
+            printf("%c\n",buttons);
+        }
+        
     }
 
     free_interfaces();
