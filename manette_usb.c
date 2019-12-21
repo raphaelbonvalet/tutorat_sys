@@ -102,20 +102,21 @@ void free_interfaces(){
 void Send(unsigned char c, int endpoint)
 {
   int result;
-  libusb_interrupt_transfer(deviceHandle,endpoint,&c,1,&result,1000);
+  int status=libusb_interrupt_transfer(deviceHandle, endpoint, &c, 1, &result, 1000);
+  if(status!=0){
+      perror("libusb_interrupt_transfer_SEND");
+      exit(-1);
+  }
 }
-
-//Recieve ne marche pas
 
 void Recieve(int endpoint)
 {
-  unsigned char data[8];
-  int size=sizeof(data);
+  unsigned char data;
   int result;
 
-  int status=libusb_interrupt_transfer(deviceHandle, endpoint, data,size, &result, 1000);
+  int status=libusb_interrupt_transfer(deviceHandle, endpoint, &data, 1, &result, 1000);
   if(status!=0){
-      perror("libusb_interrupt_transfer_R");
+      perror("libusb_interrupt_transfer_RECIEVE");
       exit(-1);
   }
   //return data;

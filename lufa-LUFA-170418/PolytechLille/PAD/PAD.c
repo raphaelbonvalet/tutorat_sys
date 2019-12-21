@@ -56,7 +56,6 @@ int main(void)
 
 		if (Endpoint_IsOUTReceived()){
 	    if (Endpoint_IsReadWriteAllowed()){
-			  /* Read in the LED report from the host */
 			  uint8_t LEDReport = Endpoint_Read_8();
 				Serial_SendByte(LEDReport);
 			}
